@@ -341,10 +341,10 @@ const fmtS=t=>{const f=fmt(t);return f.ap+' '+f.hm};
 
 function newGame(){
   P={x:4.5,y:3.6,face:'down',flip:false,moving:false};
-  INV=['phone'];
+  INV=[];
   const minor=LOOKS[LOOK].minor;
-  ITEMS.phone.desc=minor?'내 스마트폰. 혹시 몰라 학생증 사진도 찍어 뒀다.':'모바일 신분증 앱이 깔린 내 스마트폰. 신분증 사진도 찍어 뒀다.';
-  WITEMS=[{id:'clover',x:14.5,y:7.6,hidden:1},{id:'ticket',x:3.5,y:3.5},{id:'calc',x:5.5,y:5.4},{id:'pen',x:2.5,y:5.4},{id:'analog',x:5.5,y:3.5},{id:'watch',x:6.4,y:2.5},{id:'glasses',x:2.6,y:2.6},{id:minor?'oldcard':'student',x:3.6,y:5.4},{id:'choco',x:6.4,y:4.6}];
+  ITEMS.phone.desc=minor?'침대 옆에서 충전 중이던 내 스마트폰. 혹시 몰라 학생증 사진도 찍어 뒀다.':'침대 옆에서 충전 중이던 내 스마트폰. 모바일 신분증 앱도 깔려 있고, 신분증 사진도 찍어 뒀다.';
+  WITEMS=[{id:'clover',x:14.5,y:7.6,hidden:1},{id:'phone',x:4.5,y:3.4},{id:'ticket',x:3.5,y:3.5},{id:'calc',x:5.5,y:5.4},{id:'pen',x:2.5,y:5.4},{id:'analog',x:5.5,y:3.5},{id:'watch',x:6.4,y:2.5},{id:'glasses',x:2.6,y:2.6},{id:minor?'oldcard':'student',x:3.6,y:5.4},{id:'choco',x:6.4,y:4.6}];
   NPCS=makeNPCS();
   ENTRY=SESSION.t;DEADLINE=ENTRY+20;TIME_START=ENTRY-60;
   F={};CUT=null;PREP=0;MENT=60;TIME=TIME_START;RES=null;RETRIES=0;SNAPS=[];BADGES=[];FLOATS=[];PARTS=[];TARGET=null;LASTOBJ=0;
@@ -787,7 +787,7 @@ function blocked(x,y){
 let lastTick=-1;
 function update(dt){
   if(!F.arrived){
-    TIME+=dt*.8;
+    TIME+=dt*(DEADLINE-TIME_START)/300; // 집 출발~입실 마감까지 실제 5분
     const m=Math.floor(TIME);if(m!==lastTick){lastTick=m;updateHUD();if(m%2===0){SNAPS.push(snap());if(SNAPS.length>60)SNAPS.shift()}
       if(m===ENTRY){toast('⏰ 입실 시간이에요! 20분이 지나면 입실할 수 없어요');beep(440,.2)}
       if(m===DEADLINE-10){toast('⚠️ 입실 마감 10분 전! 서둘러!');beep(440,.2)}}
@@ -865,7 +865,7 @@ function drawTileObj(i,j,c,t){
   if(c==='l'){const [x,y]=iso(i+.5,j+.5);ctx.fillStyle='rgba(0,0,0,.18)';ctx.beginPath();ctx.ellipse(x,y,7,3,0,0,6.3);ctx.fill();ctx.fillStyle='#3b4660';ctx.fillRect(x-2,y-56,4,56);ctx.fillStyle='#ffe48a';ctx.beginPath();ctx.arc(x,y-60,7,0,6.3);ctx.fill();ctx.fillStyle='rgba(255,228,138,.25)';ctx.beginPath();ctx.arc(x,y-60,14+Math.sin(t*3)*2,0,6.3);ctx.fill();return}
   if(c==='b'){box(i+.08,j+.12,i+.92,j+.88,14,'#ffffff','#d9dfe8','#c4ccd8');box(i+.3,j+.12,i+.92,j+.88,4,'#5b8de6','#4a76c4','#3e66ab',14);box(i+.1,j+.2,i+.3,j+.8,5,'#fff','#e5e5e5','#d5d5d5',14);return}
   if(c==='k'){box(i+.12,j+.1,i+.88,j+.9,26,'#b9854f','#9a6b3d','#875c33');const a=iso(i+.3,j+.9),b=iso(i+.7,j+.9);ctx.strokeStyle='#5c3b1f';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(a[0],a[1]-14);ctx.lineTo(b[0],b[1]-14);ctx.stroke();
-    if(!F||!F.drawer){sparkleIcon(i+.5,j+.5,40,t);if(F&&F.needId&&!hasValidId()){const a=(Math.sin(t*5)+1)/2;diamond(i,j,`rgba(255,220,60,${.3+a*.4})`,-.2);const [x,y]=iso(i+.5,j+.5);ctx.fillStyle='#e8513d';ctx.font='bold 17px Jua';ctx.textAlign='center';ctx.fillText('▼ 신분증 여기!',x,y-66+Math.sin(t*4)*3)}}return}
+    if(!F||!F.drawer){bigSparkle(i+.5,j+.5,44,t);if(F&&F.needId&&!hasValidId()){const a=(Math.sin(t*5)+1)/2;diamond(i,j,`rgba(255,220,60,${.3+a*.4})`,-.2);const [x,y]=iso(i+.5,j+.5);ctx.fillStyle='#e8513d';ctx.font='bold 17px Jua';ctx.textAlign='center';ctx.fillText('▼ 신분증 여기!',x,y-66+Math.sin(t*4)*3)}}return}
   if(c==='c'){const mine=i===10&&j===19;box(i+.1,j+.1,i+.9,j+.9,22,'#f2f5fa','#c9d2df','#b3bfd0');box(i+.35,j+.15,i+.75,j+.3,22,'#2b3348','#1e2536','#161c2a',22);
     const a=iso(i+.4,j+.3),b=iso(i+.72,j+.3);poly(ctx,[[a[0],a[1]-25],[b[0],b[1]-25],[b[0],b[1]-41],[a[0],a[1]-41]],mine?'#ffe48a':'#6fd3ff');
     if(mine&&F&&F.idChecked){const [x,y]=iso(i+.5,j+.5);const bo=Math.sin(t*4)*4;ctx.fillStyle='#e8513d';ctx.font='bold 18px Jua';ctx.textAlign='center';ctx.fillText('▼ 내 자리',x,y-60+bo)}return}
@@ -878,6 +878,13 @@ function drawTileObj(i,j,c,t){
     ctx.fillStyle='#e8513d';ctx.font='15px serif';ctx.textAlign='center';ctx.fillText('⚠️',x,y-55);ctx.font='bold 11px Jua';ctx.fillText('부정행위',x,y-42);ctx.fillText('단속!',x,y-31);return}
   if(c==='S'){const [x,y]=iso(i+.5,j+.5);ctx.fillStyle='#7a5230';ctx.fillRect(x-2,y-34,4,34);ctx.fillStyle='#fff4e2';ctx.strokeStyle='#7a5230';ctx.lineWidth=2;ctx.beginPath();ctx.roundRect?ctx.roundRect(x-34,y-54,68,22,5):ctx.rect(x-34,y-54,68,22);ctx.fill();ctx.stroke();ctx.fillStyle='#1b2a4a';ctx.font='13px Jua';ctx.textAlign='center';ctx.fillText('시험장 →',x,y-38);return}
 }
+function bigSparkle(x,y,h,t){const [sx,sy]=iso(x,y);const a=(Math.sin(t*4)+1)/2,bo=Math.sin(t*3)*4,cy=sy-h-14+bo;
+  const g=ctx.createRadialGradient(sx,cy,2,sx,cy,34+a*8);g.addColorStop(0,'rgba(255,245,170,.95)');g.addColorStop(.45,'rgba(255,215,80,.55)');g.addColorStop(1,'rgba(255,215,80,0)');
+  ctx.fillStyle=g;ctx.beginPath();ctx.arc(sx,cy,34+a*8,0,6.3);ctx.fill();
+  ctx.save();ctx.translate(sx,cy);ctx.rotate(t*.8);ctx.strokeStyle=`rgba(255,255,255,${.6+a*.4})`;ctx.lineWidth=3;ctx.lineCap='round';
+  for(let k=0;k<8;k++){ctx.rotate(Math.PI/4);ctx.beginPath();ctx.moveTo(0,16+a*3);ctx.lineTo(0,(k%2?24:30)+a*5);ctx.stroke()}ctx.restore();
+  ctx.font=`${30+a*8}px serif`;ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('✨',sx,cy);ctx.textBaseline='alphabetic';
+  const d=iso(x,y);ctx.fillStyle=`rgba(255,230,90,${.25+a*.3})`;ctx.beginPath();ctx.ellipse(d[0],d[1],30,14,0,0,6.3);ctx.fill()}
 function sparkleIcon(x,y,h,t){const [sx,sy]=iso(x,y);const a=(Math.sin(t*5)+1)/2;ctx.fillStyle=`rgba(255,236,140,${.5+a*.5})`;ctx.font=`${12+a*4}px serif`;ctx.textAlign='center';ctx.fillText('✨',sx,sy-h-6)}
 function drawChar(c,px,py,L,o,t,s=1){
   c.save();c.translate(px,py);c.scale(s,s);
